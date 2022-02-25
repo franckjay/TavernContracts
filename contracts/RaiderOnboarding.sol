@@ -18,7 +18,7 @@ contract RaiderOnboarding is ERC721 {
         string userName;
         string imageURI;
         string guildRole;
-        string[] skills;
+        string skills;
         string timezone; // GMT
         // raids completed
         // rips completed
@@ -40,8 +40,8 @@ contract RaiderOnboarding is ERC721 {
 
     // Upon creation, the contract will have default roles, images, and timezone
     constructor(
-        string[] memory characterImageURIs,
         string[] memory roles,
+        string[] memory characterImageURIs,
         string memory timezone
     )
     // NFT/token symbol, like ETH or BTC
@@ -52,7 +52,7 @@ contract RaiderOnboarding is ERC721 {
                 userName: "Nemo",
                 guildRole: roles[i],
                 imageURI: characterImageURIs[i],
-                skills: new string[](0),         // initialize as empty array
+                skills: "Skill1, Skill2",
                 timezone: timezone
             }));
 
@@ -65,7 +65,8 @@ contract RaiderOnboarding is ERC721 {
     // the bot must pass in the correct index for the role/image
     // and specify userName, skills, and timezone
     // later we will source skills from DungeonMaster or something
-    function mintCharacterNFT(uint _characterIndex, string memory userName, string[] memory skills, string memory timezone) external {
+    // frontend should convert to and from array, but send as string
+    function mintCharacterNFT(uint _characterIndex, string memory userName, string memory skills, string memory timezone) external {
 
         // Get current tokenId (starts at 1 since we incremented in the constructor).
         uint256 newItemId = _tokenIds.current();
@@ -100,6 +101,7 @@ contract RaiderOnboarding is ERC721 {
 
         string memory guildRole = charAttributes.guildRole;
         string memory timezone = charAttributes.timezone;
+        string memory skills = charAttributes.skills;
 
         string memory json = Base64.encode(
             abi.encodePacked(
@@ -110,8 +112,9 @@ contract RaiderOnboarding is ERC721 {
                 '", "description": "This NFT represents a new member of RaidGuild!", "image": "',
                 charAttributes.imageURI,
                 '", "attributes": ['
-                                 '{ "trait_type": "timezone", "value": "',timezone,'" },'
-                                 '{ "trait_type": "Guild Role", "value": "',guildRole,'" }'
+                                 '{ "trait_type": "timezone", "value": "', timezone,'" },'
+                                 '{ "trait_type": "Guild Role", "value": "', guildRole,'" },'
+                                 '{ "trait_type": "Skills", "value": "', skills,'" }'
                                 ']}'
             )
         );
