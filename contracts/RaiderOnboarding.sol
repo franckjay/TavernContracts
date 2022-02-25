@@ -3,9 +3,7 @@
 pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
-
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -31,38 +29,43 @@ contract RaiderOnboarding is ERC721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    CharacterAttributes[] defaultCharacters;
+    // Our default cast of characters to choose from
+    CharacterAttributes[] possibleCharacters;
 
-    // maps the NFT uuid to the struct of CharacterAttributes
+    // we require two separate mappings
+    // later we will use this to allow holders to update their NFTs
+    mapping(address => uint256) public nftHolders;
+    // ERC731 metadata tokenURI requires tokenID to be passed in
     mapping(uint256 => CharacterAttributes) public nftHolderAttributes;
 
-    // we will have many owners, each with a different NFT
-    mapping(address => uint256) public nftHolders;
-
+    // Upon creation, the contract will have default roles, images, and timezone
     constructor(
-        string[] memory userNames,
         string[] memory characterImageURIs,
         string[] memory roles,
-        string[][] memory skills,
-        string[] memory timezones
+        string memory timezone
     )
     // NFT/token symbol, like ETH or BTC
     ERC721("Raiders", "RAIDER")
     {
-        for(uint i = 0; i < userNames.length; i += 1) {
-            defaultCharacters.push(CharacterAttributes({
-                userName: userNames[i],
-                imageURI: characterImageURIs[i],
+        for(uint i = 0; i < roles.length; i += 1) {
+            possibleCharacters.push(CharacterAttributes({
+                userName: "Nemo",
                 guildRole: roles[i],
-                skills: skills[i],
-                timezone: timezones[i]
+                imageURI: characterImageURIs[i],
+                skills: new string[](0),         // initialize as empty array
+                timezone: timezone
             }));
 
         }
         // first NFT has an ID of 1
         _tokenIds.increment();
     }
-    function mintCharacterNFT(uint _characterIndex) external {
+
+
+    // the bot must pass in the correct index for the role/image
+    // and specify userName, skills, and timezone
+    // later we will source skills from DungeonMaster or something
+    function mintCharacterNFT(uint _characterIndex, string memory userName, string[] memory skills, string memory timezone) external {
 
         // Get current tokenId (starts at 1 since we incremented in the constructor).
         uint256 newItemId = _tokenIds.current();
@@ -70,22 +73,17 @@ contract RaiderOnboarding is ERC721 {
         // Assigns the tokenId to the caller's wallet address
         _safeMint(msg.sender, newItemId);
 
-        // we already have an array of characters
-        // now we pull them out as this function is called and the contract records
-        // to whom that character belongs
-
+        // Create new character, map to item id
         nftHolderAttributes[newItemId] = CharacterAttributes({
-            userName: defaultCharacters[_characterIndex].userName,
-            imageURI: defaultCharacters[_characterIndex].imageURI,
-            guildRole: defaultCharacters[_characterIndex].guildRole,
-            skills: defaultCharacters[_characterIndex].skills,
-            timezone: defaultCharacters[_characterIndex].timezone
+            userName: userName,
+            imageURI: possibleCharacters[_characterIndex].imageURI,
+            guildRole: possibleCharacters[_characterIndex].guildRole,
+            skills: skills,
+            timezone: bytes(timezone).length != 0 ? timezone : possibleCharacters[_characterIndex].timezone
         });
 
-        console.log("Minted NFT w/ tokenId %s and characterIndex %s", newItemId, _characterIndex);
-
-        // Keep an easy way to see who owns what NFT.
         nftHolders[msg.sender] = newItemId;
+        console.log("Minted NFT w/ tokenId %s and characterIndex %s", newItemId, _characterIndex);
 
         // Increment the tokenId for the next person that uses it.
         _tokenIds.increment();
