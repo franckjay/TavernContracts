@@ -89,7 +89,14 @@ contract RaiderOnboarding is ERC721 {
 
         // Increment the tokenId for the next person that uses it.
         _tokenIds.increment();
+        emit CharacterNFTMinted(msg.sender, newItemId, _characterIndex);
     }
+    event CharacterNFTMinted(
+        address sender,
+        uint256 tokenId,
+        uint256 characterIndex
+    );
+
     function tokenURI(uint256 _tokenId) public view override returns (string memory) {
         CharacterAttributes memory charAttributes = nftHolderAttributes[_tokenId];
 
