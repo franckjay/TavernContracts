@@ -91,6 +91,30 @@ contract RaiderOnboarding is ERC721 {
         _tokenIds.increment();
     }
     function tokenURI(uint256 _tokenId) public view override returns (string memory) {
-        // to do
+        CharacterAttributes memory charAttributes = nftHolderAttributes[_tokenId];
+
+        string memory guildRole = charAttributes.guildRole;
+        string memory timezone = charAttributes.timezone;
+
+        string memory json = Base64.encode(
+            abi.encodePacked(
+                '{"name": "',
+                charAttributes.userName,
+                ' -- NFT #: ',
+                Strings.toString(_tokenId),
+                '", "description": "This NFT represents a new member of RaidGuild!", "image": "',
+                charAttributes.imageURI,
+                '", "attributes": ['
+                                 '{ "trait_type": "timezone", "value": "',timezone,'" },'
+                                 '{ "trait_type": "Guild Role", "value": "',guildRole,'" }'
+                                ']}'
+            )
+        );
+
+        string memory output = string(
+            abi.encodePacked("data:application/json;base64,", json)
+        );
+
+        return output;
     }
 }
