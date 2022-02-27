@@ -66,13 +66,13 @@ contract RaiderOnboarding is ERC721 {
     // and specify userName, skills, and timezone
     // later we will source skills from DungeonMaster or something
     // frontend should convert to and from array, but send as string
-    function mintCharacterNFT(uint _characterIndex, string memory userName, string memory skills, string memory timezone) external {
+    function mintCharacterNFT(address nftOwner, uint _characterIndex, string memory userName, string memory skills, string memory timezone) external {
 
         // Get current tokenId (starts at 1 since we incremented in the constructor).
         uint256 newItemId = _tokenIds.current();
 
         // Assigns the tokenId to the caller's wallet address
-        _safeMint(msg.sender, newItemId);
+        _safeMint(nftOwner, newItemId);
 
         // Create new character, map to item id
         nftHolderAttributes[newItemId] = CharacterAttributes({
@@ -83,12 +83,12 @@ contract RaiderOnboarding is ERC721 {
             timezone: bytes(timezone).length != 0 ? timezone : possibleCharacters[_characterIndex].timezone
         });
 
-        nftHolders[msg.sender] = newItemId;
+        nftHolders[nftOwner] = newItemId;
         console.log("Minted NFT w/ tokenId %s and characterIndex %s", newItemId, _characterIndex);
 
         // Increment the tokenId for the next person that uses it.
         _tokenIds.increment();
-        emit CharacterNFTMinted(msg.sender, newItemId, _characterIndex);
+        emit CharacterNFTMinted(nftOwner, newItemId, _characterIndex);
     }
     event CharacterNFTMinted(
         address sender,
