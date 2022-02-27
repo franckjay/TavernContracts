@@ -17,7 +17,7 @@ contract RaiderOnboarding is ERC721 {
     struct CharacterAttributes {
         string userName;
         string imageURI;
-        string guildRole;
+        string roles;
         string skills;
         string timezone; // GMT
         // raids completed
@@ -50,7 +50,7 @@ contract RaiderOnboarding is ERC721 {
         for(uint i = 0; i < roles.length; i += 1) {
             possibleCharacters.push(CharacterAttributes({
                 userName: "Nemo",
-                guildRole: roles[i],
+                roles: roles[i],
                 imageURI: characterImageURIs[i],
                 skills: "Skill1, Skill2",
                 timezone: timezone
@@ -64,7 +64,7 @@ contract RaiderOnboarding is ERC721 {
 
     // the bot must pass in the correct index for the role/image
     // and specify userName, skills, and timezone
-    // timezone is optional
+    // timezone is optional - pass in an empty string
     // later we will source skills from DungeonMaster or something
     // frontend should convert to and from array, but send as string
     function mintCharacterNFT(address nftOwner, uint _characterIndex, string memory userName, string memory skills, string memory timezone) external {
@@ -79,7 +79,7 @@ contract RaiderOnboarding is ERC721 {
         nftHolderAttributes[newItemId] = CharacterAttributes({
             userName: userName,
             imageURI: possibleCharacters[_characterIndex].imageURI,
-            guildRole: possibleCharacters[_characterIndex].guildRole,
+            roles: possibleCharacters[_characterIndex].roles,
             skills: skills,
             timezone: bytes(timezone).length != 0 ? timezone : possibleCharacters[_characterIndex].timezone
         });
@@ -103,17 +103,20 @@ contract RaiderOnboarding is ERC721 {
         string skills
     );
 
-    function updateCharacterSkills(address nftOwner, string memory skills) external {
+    function updateCharacterSkills(address nftOwner, string memory skills, string memory roles) external {
         uint256 nftID = nftHolders[nftOwner];
         CharacterAttributes storage character = nftHolderAttributes[nftID];
         character.skills = skills;
+        if (bytes(roles).length != 0) {
+            character.roles = roles;
+        }
         emit CharacterSkillsUpdated(nftOwner, nftID, skills);
     }
 
     function tokenURI(uint256 _tokenId) public view override returns (string memory) {
         CharacterAttributes memory charAttributes = nftHolderAttributes[_tokenId];
 
-        string memory guildRole = charAttributes.guildRole;
+        string memory roles = charAttributes.roles;
         string memory timezone = charAttributes.timezone;
         string memory skills = charAttributes.skills;
 
@@ -127,7 +130,7 @@ contract RaiderOnboarding is ERC721 {
                 charAttributes.imageURI,
                 '", "attributes": ['
                                  '{ "trait_type": "timezone", "value": "', timezone,'" },'
-                                 '{ "trait_type": "Guild Role", "value": "', guildRole,'" },'
+                                 '{ "trait_type": "Guild Roles", "value": "', roles,'" },'
                                  '{ "trait_type": "Skills", "value": "', skills,'" }'
                                 ']}'
             )

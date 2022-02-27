@@ -45,7 +45,8 @@ const main = async () => {
   // update the character
   let update = await gameContract.updateCharacterSkills(
     newNFTOwner,
-    "singing dancing and also writing"
+    "singing dancing and also writing",
+    ""
   );
   await update.wait();
 
