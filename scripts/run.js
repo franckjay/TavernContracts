@@ -37,6 +37,17 @@ const main = async () => {
   // Get the value of the NFT's URI.
   let returnedTokenUri = await gameContract.tokenURI(1);
   console.log("Token URI:", returnedTokenUri);
+
+  // update the character
+  let update = await gameContract.updateCharacterSkills(
+    "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+    "singing dancing and also writing"
+  );
+  await update.wait();
+
+  // Get the value of the NFT's URI.
+  let updatedTokenURI = await gameContract.tokenURI(1);
+  console.log("Token URI:", updatedTokenURI);
 };
 
 const runMain = async () => {

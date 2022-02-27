@@ -96,6 +96,19 @@ contract RaiderOnboarding is ERC721 {
         uint256 characterIndex
     );
 
+    event CharacterSkillsUpdated(
+        address nftOwner,
+        uint256 nftID,
+        string skills
+    );
+
+    function updateCharacterSkills(address nftOwner, string memory skills) external {
+        uint256 nftID = nftHolders[nftOwner];
+        CharacterAttributes storage character = nftHolderAttributes[nftID];
+        character.skills = skills;
+        emit CharacterSkillsUpdated(nftOwner, nftID, skills);
+    }
+
     function tokenURI(uint256 _tokenId) public view override returns (string memory) {
         CharacterAttributes memory charAttributes = nftHolderAttributes[_tokenId];
 
