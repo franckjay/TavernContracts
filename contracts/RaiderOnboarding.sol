@@ -64,6 +64,7 @@ contract RaiderOnboarding is ERC721 {
 
     // the bot must pass in the correct index for the role/image
     // and specify userName, skills, and timezone
+    // timezone is optional
     // later we will source skills from DungeonMaster or something
     // frontend should convert to and from array, but send as string
     function mintCharacterNFT(address nftOwner, uint _characterIndex, string memory userName, string memory skills, string memory timezone) external {

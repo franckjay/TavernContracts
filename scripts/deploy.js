@@ -4,6 +4,10 @@ const main = async () => {
   const gameContractFactory = await hre.ethers.getContractFactory(
     "RaiderOnboarding"
   );
+
+  const accounts = await hre.ethers.getSigners();
+  const newNFTOwner = accounts[0].address;
+
   const roles = baseCharacters.map((char) => char[0]);
   const avatars = baseCharacters.map((char) => char[1]);
   const gameContract = await gameContractFactory.deploy(
@@ -26,6 +30,7 @@ const main = async () => {
 
   // minting the character
   let txn = await gameContract.mintCharacterNFT(
+    newNFTOwner,
     roleToIndex[role],
     name,
     skills,
