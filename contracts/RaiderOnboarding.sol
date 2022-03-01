@@ -18,7 +18,7 @@ contract RaiderOnboarding is ERC721 {
         string userName;
         string imageURI;
         string roles;
-        string skills;
+        string[] skills;
         string timezone; // GMT
         // raids completed
         // rips completed
@@ -52,7 +52,7 @@ contract RaiderOnboarding is ERC721 {
                 userName: "Nemo",
                 roles: roles[i],
                 imageURI: characterImageURIs[i],
-                skills: "Skill1, Skill2",
+                skills: ["Skill1", "Skill2"],
                 timezone: timezone
             }));
 
@@ -67,7 +67,7 @@ contract RaiderOnboarding is ERC721 {
     // timezone is optional - pass in an empty string
     // later we will source skills from DungeonMaster or something
     // frontend should convert to and from array, but send as string
-    function mintCharacterNFT(address nftOwner, uint _characterIndex, string memory userName, string memory skills, string memory timezone) external {
+    function mintCharacterNFT(address nftOwner, uint _characterIndex, string memory userName, string[] memory skills, string memory timezone) external {
 
         // Get current tokenId (starts at 1 since we incremented in the constructor).
         uint256 newItemId = _tokenIds.current();
@@ -100,17 +100,17 @@ contract RaiderOnboarding is ERC721 {
     event CharacterSkillsUpdated(
         address nftOwner,
         uint256 nftID,
-        string skills
+        string[] skills
     );
 
-    function updateCharacterSkills(address nftOwner, string memory skills, string memory roles) external {
+    function updateCharacterSkills(address nftOwner, string memory newSkill, string memory roles) external {
         uint256 nftID = nftHolders[nftOwner];
         CharacterAttributes storage character = nftHolderAttributes[nftID];
-        character.skills = skills;
+        character.skills.push(newSkill);
         if (bytes(roles).length != 0) {
             character.roles = roles;
         }
-        emit CharacterSkillsUpdated(nftOwner, nftID, skills);
+        emit CharacterSkillsUpdated(nftOwner, nftID, newSkill);
     }
 
     function tokenURI(uint256 _tokenId) public view override returns (string memory) {
@@ -118,7 +118,7 @@ contract RaiderOnboarding is ERC721 {
 
         string memory roles = charAttributes.roles;
         string memory timezone = charAttributes.timezone;
-        string memory skills = charAttributes.skills;
+        string[] memory skills = charAttributes.skills;
 
         string memory json = Base64.encode(
             abi.encodePacked(
